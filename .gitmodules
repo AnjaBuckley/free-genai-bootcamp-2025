@@ -1,0 +1,3 @@
+[submodule "lang-portal-wortwunder/wortwunder-launchpad"]
+	path = lang-portal-wortwunder/wortwunder-launchpad
+	url = https://github.com/AnjaBuckley/wortwunder-launchpad.git
