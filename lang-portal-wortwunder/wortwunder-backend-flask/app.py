@@ -1,68 +1,84 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from lib.db import get_vocabulary
+from lib.db import get_vocabulary, get_word_groups, add_vocabulary
 import os
 
 app = Flask(__name__)
 
-# Update CORS to be more flexible for different environments
+# Configure CORS with specific allowed origins
 CORS(
     app,
     resources={
         r"/api/*": {
             "origins": [
-                "http://localhost:8080",
-                "http://127.0.0.1:8080",
-                "http://localhost:5173",
+                "http://localhost:5001",  # Flask development server
+                "http://localhost:5173",  # Vite development server
+                "http://127.0.0.1:5001",
                 "http://127.0.0.1:5173",
-                "https://verdant-liger-86fa01.netlify.app",
-                "https://mimivader.pythonanywhere.com",
-                "http://192.168.178.39:8080",
+                "https://verdant-liger-86fa01.netlify.app",  # Your Netlify production URL
+                "https://mimivader.pythonanywhere.com"       # Your PythonAnywhere URL
             ],
-            "methods": ["GET", "POST", "OPTIONS", "HEAD"],
-            "allow_headers": ["Content-Type", "Authorization", "Accept"],
-            "expose_headers": ["Content-Type", "X-Debug"],
+            "methods": ["GET", "POST", "OPTIONS"],
+            "allow_headers": ["Content-Type"]
         }
-    },
+    }
 )
 
 @app.route("/")
 def home():
     return jsonify({"message": "Welcome to Wortwunder API"}), 200
 
-@app.route("/api/vocabulary")
+@app.route("/api/word-groups")
+def word_groups():
+    """Get all word groups"""
+    try:
+        groups = get_word_groups()
+        return jsonify(groups)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/vocabulary", methods=["GET", "POST"])
 def vocabulary():
     try:
+        if request.method == "POST":
+            data = request.json
+            success = add_vocabulary(
+                data["german_word"],
+                data["english_translation"],
+                data["theme"],
+                data.get("word_group_id")
+            )
+            if success:
+                return jsonify({"message": "Vocabulary added successfully"}), 201
+            return jsonify({"error": "Failed to add vocabulary"}), 400
+
+        # GET method
         theme = request.args.get("theme")
         search = request.args.get("search")
+        word_group_id = request.args.get("word_group_id", type=int)
 
-        query = "SELECT * FROM vocabulary"
+        query = "SELECT v.*, wg.name as word_group_name FROM vocabulary v LEFT JOIN word_groups wg ON v.word_group_id = wg.id"
         params = []
         where_conditions = []
 
         if theme:
-            where_conditions.append("theme = ?")
+            where_conditions.append("v.theme = ?")
             params.append(theme)
 
         if search:
-            where_conditions.append("german_word LIKE ?")
+            where_conditions.append("v.german_word LIKE ?")
             params.append(f"%{search}%")
 
         if where_conditions:
             query += " WHERE " + " AND ".join(where_conditions)
 
-        vocab_items = get_vocabulary(query, params)
-        print(f"Retrieved {len(vocab_items)} vocabulary items")
+        vocab_items = get_vocabulary(query, params, word_group_id)
+        return jsonify(vocab_items)
 
-        response = jsonify(vocab_items)
-        response.headers["X-Debug"] = "Flask-Backend"
-        print(f"Sending response with headers: {dict(response.headers)}")
-        return response
     except Exception as e:
         print(f"Error in vocabulary endpoint: {str(e)}")
         print(f"Error type: {type(e).__name__}")
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
