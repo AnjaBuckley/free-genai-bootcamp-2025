@@ -32,13 +32,17 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Running the Backend
+### Running the Backend (Development Mode)
 
 ```bash
 python app.py
 ```
 
-The backend will start on `http://localhost:5001`
+The development server will start on `http://localhost:5001`
+
+### Production Backend
+The production backend is hosted on PythonAnywhere at:
+`https://mimivader.pythonanywhere.com`
 
 ## Frontend Setup
 
@@ -55,7 +59,7 @@ npm install
 yarn install
 ```
 
-### Running the Frontend
+### Running the Frontend (Development Mode)
 
 ```bash
 npm run dev
@@ -63,7 +67,11 @@ npm run dev
 yarn dev
 ```
 
-The frontend will start on `http://localhost:5173`
+The development server will start on `http://localhost:5173`
+
+### Production Frontend
+The production frontend is hosted on Netlify at:
+`https://verdant-liger-86fa01.netlify.app`
 
 ## API Endpoints
 
