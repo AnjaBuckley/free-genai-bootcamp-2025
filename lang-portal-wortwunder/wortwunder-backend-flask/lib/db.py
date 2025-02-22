@@ -55,12 +55,12 @@ def init_db():
 
     # Insert default word groups
     default_groups = [
-        ("Basic", "Essential everyday words"),
-        ("Intermediate", "Common words for regular conversations"),
-        ("Advanced", "Complex and specialized vocabulary"),
-        ("Travel", "Words useful for traveling"),
-        ("Food", "Food and dining related words"),
-        ("Business", "Professional and business vocabulary")
+        ("A1", "Beginner - Basic everyday expressions and phrases"),
+        ("A2", "Elementary - Frequently used expressions and simple communication"),
+        ("B1", "Intermediate - Clear language on familiar matters"),
+        ("B2", "Upper Intermediate - Complex texts and abstract topics"),
+        ("C1", "Advanced - Fluent expression for social and professional purposes"),
+        ("C2", "Mastery - Understanding and expressing with precision")
     ]
 
     cursor.executemany(
@@ -70,9 +70,9 @@ def init_db():
 
     # Restore existing vocabulary with basic word group
     if existing_vocab:
-        # Add them all to the Basic group initially
-        cursor.execute("SELECT id FROM word_groups WHERE name = 'Basic'")
-        basic_group_id = cursor.fetchone()['id']
+        # Add them all to the A1 group initially
+        cursor.execute("SELECT id FROM word_groups WHERE name = 'A1'")
+        a1_group_id = cursor.fetchone()['id']
         
         for word in existing_vocab:
             cursor.execute(
@@ -81,26 +81,26 @@ def init_db():
                 (german_word, english_translation, theme, word_group_id)
                 VALUES (?, ?, ?, ?)
                 """,
-                (word['german_word'], word['english_translation'], word['theme'], basic_group_id)
+                (word['german_word'], word['english_translation'], word['theme'], a1_group_id)
             )
 
     # Add some new sample words if we didn't have existing ones
     if not existing_vocab:
         sample_data = [
-            ("und", "and", "General", 1),  # Basic
-            ("sein", "to be", "General", 1),  # Basic
-            ("ich", "I", "General", 1),  # Basic
-            ("du", "you", "General", 1),  # Basic
-            ("er", "he", "General", 1),  # Basic
-            ("sie", "she/they", "General", 1),  # Basic
-            ("es", "it", "General", 1),  # Basic
-            ("wir", "we", "General", 1),  # Basic
-            ("ihr", "you (plural)", "General", 2),  # Intermediate
-            ("haben", "to have", "General", 2),  # Intermediate
-            ("Essen", "food", "Food", 1),  # Basic
-            ("Trinken", "drink", "Food", 1),  # Basic
-            ("Reise", "journey/trip", "Travel", 2),  # Intermediate
-            ("Zahl", "number", "Numbers", 2),  # Intermediate
+            ("und", "and", "General", 1),  # A1
+            ("sein", "to be", "General", 1),  # A1
+            ("ich", "I", "General", 1),  # A1
+            ("du", "you", "General", 1),  # A1
+            ("er", "he", "General", 1),  # A1
+            ("sie", "she/they", "General", 1),  # A1
+            ("es", "it", "General", 1),  # A1
+            ("wir", "we", "General", 1),  # A1
+            ("ihr", "you (plural)", "General", 2),  # A2
+            ("haben", "to have", "General", 2),  # A2
+            ("Essen", "food", "Food", 1),  # A1
+            ("Trinken", "drink", "Food", 1),  # A1
+            ("Reise", "journey/trip", "Travel", 2),  # A2
+            ("Zahl", "number", "Numbers", 2),  # A2
         ]
 
         cursor.executemany(
