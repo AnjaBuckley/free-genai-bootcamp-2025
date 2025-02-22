@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from lib.db import get_vocabulary
+import os
 
 app = Flask(__name__)
 
-# Update CORS to allow port 8080
+# Update CORS to be more flexible for different environments
 CORS(
     app,
     resources={
@@ -12,7 +13,11 @@ CORS(
             "origins": [
                 "http://localhost:8080",
                 "http://127.0.0.1:8080",
-                "http://192.168.178.39:8080",  # Also allow your network IP
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://verdant-liger-86fa01.netlify.app",
+                "https://mimivader.pythonanywhere.com",
+                "http://192.168.178.39:8080",
             ],
             "methods": ["GET", "POST", "OPTIONS", "HEAD"],
             "allow_headers": ["Content-Type", "Authorization", "Accept"],
@@ -21,6 +26,9 @@ CORS(
     },
 )
 
+@app.route("/")
+def home():
+    return jsonify({"message": "Welcome to Wortwunder API"}), 200
 
 @app.route("/api/vocabulary")
 def vocabulary():
@@ -57,5 +65,5 @@ def vocabulary():
 
 
 if __name__ == "__main__":
-    print("Starting Flask server on http://127.0.0.1:5001")
-    app.run(debug=True, host="127.0.0.1", port=5001)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)
