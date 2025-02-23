@@ -13,8 +13,10 @@ CORS(
             "origins": [
                 "http://localhost:5001",  # Flask development server
                 "http://localhost:5173",  # Vite development server
+                "http://localhost:8080",  # Vite alternative port
                 "http://127.0.0.1:5001",
                 "http://127.0.0.1:5173",
+                "http://127.0.0.1:8080",
                 "https://verdant-liger-86fa01.netlify.app",  # Your Netlify production URL
                 "https://mimivader.pythonanywhere.com"       # Your PythonAnywhere URL
             ],
