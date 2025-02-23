@@ -379,7 +379,7 @@ def get_vocabulary(level=None, word_group_id=None):
         # Add WHERE clause for filtering
         where_clauses = []
         if level and level != 'All Levels':
-            where_clauses.append("v.cefr_level = ?")
+            where_clauses.append("UPPER(v.cefr_level) = UPPER(?)")  # Case-insensitive comparison
             params.append(level)
             
         if word_group_id:
@@ -388,6 +388,9 @@ def get_vocabulary(level=None, word_group_id=None):
 
         if where_clauses:
             query += " WHERE " + " AND ".join(where_clauses)
+
+        # Add ORDER BY clause to ensure consistent ordering
+        query += " ORDER BY v.german_word ASC"
 
         cursor.execute(query, tuple(params))
         vocabulary = cursor.fetchall()
