@@ -363,28 +363,33 @@ def add_vocabulary(german_word: str, english_translation: str, theme: str, cefr_
         print(f"Error adding vocabulary: {e}")
         return False
 
-def get_vocabulary(query=None, params=None, word_group_id=None):
-    """Get vocabulary items with optional filtering"""
+def get_vocabulary(level=None, word_group_id=None):
+    """Get vocabulary items with optional filtering by CEFR level and word group"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        if query is None:
-            query = """
-                SELECT v.*, wg.name as word_group_name 
-                FROM vocabulary v 
-                LEFT JOIN word_groups wg ON v.word_group_id = wg.id
-            """
-            params = []
+        query = """
+            SELECT v.*, wg.name as word_group_name 
+            FROM vocabulary v 
+            LEFT JOIN word_groups wg ON v.word_group_id = wg.id
+        """
+        params = []
 
+        # Add WHERE clause for filtering
+        where_clauses = []
+        if level and level != 'All Levels':
+            where_clauses.append("v.cefr_level = ?")
+            params.append(level)
+            
         if word_group_id:
-            if ' WHERE ' in query:
-                query += " AND word_group_id = ?"
-            else:
-                query += " WHERE word_group_id = ?"
-            params = params + [word_group_id]
+            where_clauses.append("v.word_group_id = ?")
+            params.append(word_group_id)
 
-        cursor.execute(query, tuple(params) if params else ())
+        if where_clauses:
+            query += " WHERE " + " AND ".join(where_clauses)
+
+        cursor.execute(query, tuple(params))
         vocabulary = cursor.fetchall()
         conn.close()
         return vocabulary

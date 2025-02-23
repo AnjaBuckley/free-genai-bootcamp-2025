@@ -48,38 +48,23 @@ def vocabulary():
                 data["german_word"],
                 data["english_translation"],
                 data["theme"],
+                data["cefr_level"],
                 data.get("word_group_id")
             )
             if success:
                 return jsonify({"message": "Vocabulary added successfully"}), 201
-            return jsonify({"error": "Failed to add vocabulary"}), 400
-
-        # GET method
-        theme = request.args.get("theme")
-        search = request.args.get("search")
-        word_group_id = request.args.get("word_group_id", type=int)
-
-        query = "SELECT v.*, wg.name as word_group_name FROM vocabulary v LEFT JOIN word_groups wg ON v.word_group_id = wg.id"
-        params = []
-        where_conditions = []
-
-        if theme:
-            where_conditions.append("v.theme = ?")
-            params.append(theme)
-
-        if search:
-            where_conditions.append("v.german_word LIKE ?")
-            params.append(f"%{search}%")
-
-        if where_conditions:
-            query += " WHERE " + " AND ".join(where_conditions)
-
-        vocab_items = get_vocabulary(query, params, word_group_id)
-        return jsonify(vocab_items)
-
+            else:
+                return jsonify({"error": "Failed to add vocabulary"}), 400
+        else:
+            # Get level from query parameters
+            level = request.args.get('level', 'All Levels')
+            word_group_id = request.args.get('word_group_id')
+            if word_group_id:
+                word_group_id = int(word_group_id)
+                
+            words = get_vocabulary(level=level, word_group_id=word_group_id)
+            return jsonify(words)
     except Exception as e:
-        print(f"Error in vocabulary endpoint: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
